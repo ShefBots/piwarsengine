@@ -10,6 +10,7 @@ COM_STOP_MOVING = Command('!', 0)
 COM_SET_MOTION_ORIGIN_TO = Command('@', 0)
 COM_RESET_MOTION_ORIGIN = Command('~', 0)
 
+COM_POKE = Command('P', 0)
 COM_READ_VELOCITIES_SEND = Command('V', 0)
 COM_READ_VELOCITIES_RECV = Command('V', 6)
 COM_READ_ENCODERS_SEND = Command('?', 0)
@@ -63,6 +64,9 @@ class MotorDriver:
 
     def reset_motion_origin(self):
         self.__comms.send(COM_RESET_MOTION_ORIGIN)
+
+    def poke(self):
+        self.__comms.send(COM_POKE)
 
     def identify(self, timeout=SerialComms.DEFAULT_TIMEOUT):
         print(f"ID is {hex(self.__comms.identify(timeout))}")
