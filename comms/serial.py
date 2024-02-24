@@ -4,6 +4,7 @@ from collections import namedtuple
 from time import monotonic_ns
 
 Command = namedtuple("Command", ("value", "length"))
+COM_POKE_SEND = Command('P', 0)
 COM_IDENTIFY_SEND = Command('I', 0)
 COM_IDENTIFY_RECV = Command('I', 1)
 
@@ -96,7 +97,7 @@ class SerialComms:
         buffer[-1] = self.checksum(buffer)
 
         # Clear out the input buffer in case anything is still lingering from a previous command
-        self.__serial.reset_input_buffer()
+        # self.__serial.reset_input_buffer()  # Removed so we can capture any tracebacks from connected Picos
 
         # Write out the buffer
         self.__serial.write(buffer)
@@ -116,10 +117,13 @@ class SerialComms:
                 raise TimeoutError("Serial did not reply within the expected time")
 
         received = self.__serial.read(receive_length)  # Read the expected number of bytes
-
+        # print(received)
         expected_checksum = self.checksum(received)
         received_checksum = received[-1]
         if received_checksum != expected_checksum:
+            print("\n--------------------------------------------------")
+            print(received + self.__serial.read_all())
+            print("--------------------------------------------------")
             raise ValueError(f"Checksum mismatch! Expected {expected_checksum}, received {received_checksum}")
 
         buffer = struct.unpack(">BB" + fmt + "B", received)
@@ -130,6 +134,9 @@ class SerialComms:
             return data
         else:
             return None
+
+    def poke(self):
+        self.send(COM_POKE_SEND)
 
     def identify(self, timeout=DEFAULT_TIMEOUT):
         self.send(COM_IDENTIFY_SEND)

@@ -66,10 +66,10 @@ class MotorDriver:
         self.__comms.send(COM_RESET_MOTION_ORIGIN)
 
     def poke(self):
-        self.__comms.send(COM_POKE)
+        self.__comms.poke()
 
     def identify(self, timeout=SerialComms.DEFAULT_TIMEOUT):
-        print(f"ID is {hex(self.__comms.identify(timeout))}")
+        return self.__comms.identify(timeout)
 
     def read_velocities(self, timeout=SerialComms.DEFAULT_TIMEOUT):
         self.__comms.send(COM_READ_VELOCITIES_SEND)
