@@ -7,6 +7,10 @@ COM_WS2812_COLOUR = Command('C', 0)
 COM_RC_RECEIVER = Command('R', 0)
 
 
+COM_READ_TOF_SEND = Command('T', 0)
+COM_READ_TOF_RECV = Command('T', 2)
+
+
 class IOController:
     NAME = "IO Controller"
     EXPECTED_ID = 0x01
@@ -23,5 +27,13 @@ class IOController:
     def __del__(self):
         self.__comms.__del__()
 
-    def identify(self):
-        print(f"ID is {hex(self.__comms.identify())}")
+    def poke(self):
+        self.__comms.poke()
+
+    def identify(self, timeout=SerialComms.DEFAULT_TIMEOUT):
+        return self.__comms.identify(timeout)
+
+    def read_tof(self, timeout=SerialComms.DEFAULT_TIMEOUT):
+        self.__comms.send(COM_READ_TOF_SEND)
+        cm = self.__comms.receive(COM_READ_TOF_RECV, "H", timeout) / 10
+        return cm
