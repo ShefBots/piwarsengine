@@ -1,25 +1,23 @@
-from comms.serial import Command, SerialComms
+from comms.serial import make_command, SerialComms, USHORT, UBYTE
 
-COM_SET_SERVO_GRAB_ANGLE = Command('G', 0)
-COM_SET_SERVO_LAUNCH_ANGLE = Command('L', 0)
-COM_SET_LAUNCH_SPEED = Command('S', 0)
-COM_WS2812_COLOUR = Command('C', 0)
-COM_RC_RECEIVER = Command('R', 0)
+COM_SET_SERVO_GRAB_ANGLE = make_command('G')
+COM_SET_SERVO_LAUNCH_ANGLE = make_command('L')
+COM_SET_LAUNCH_SPEED = make_command('S')
+COM_WS2812_COLOUR = make_command('C')
+COM_RC_RECEIVER = make_command('R')
 
 
-COM_READ_TOF_SEND = Command('T', 0)
-COM_READ_TOF_RECV = Command('T', 2)
+COM_READ_TOF_SEND = make_command('T')
+COM_READ_TOF_RECV = make_command('T', USHORT)
+
+COM_SET_LED_SEND = make_command('L', UBYTE * 4)
 
 
 class IOController:
     NAME = "IO Controller"
     EXPECTED_ID = 0x01
 
-    COM_SET_SERVO_GRAB_ANGLE = 'G'
-    COM_SET_SERVO_LAUNCH_ANGLE = 'L'
-    COM_SET_LAUNCH_SPEED = 'S'
-    COM_WS2812_COLOUR = 'C'
-    COM_RC_RECEIVER = 'R'
+    TOF_SCALING = 10.0
 
     def __init__(self, comms: SerialComms):
         self.__comms = comms
@@ -35,5 +33,7 @@ class IOController:
 
     def read_tof(self, timeout=SerialComms.DEFAULT_TIMEOUT):
         self.__comms.send(COM_READ_TOF_SEND)
-        cm = self.__comms.receive(COM_READ_TOF_RECV, "H", timeout) / 10
-        return cm
+        return self.__comms.receive(COM_READ_TOF_RECV, timeout) / self.TOF_SCALING
+
+    def set_led(self, led, r, g, b):
+        self.__comms.send(COM_SET_LED_SEND, led, r, g, b)

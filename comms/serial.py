@@ -3,10 +3,39 @@ from serial import Serial
 from collections import namedtuple
 from time import monotonic_ns
 
-Command = namedtuple("Command", ("value", "length"))
-COM_POKE_SEND = Command('P', 0)
-COM_IDENTIFY_SEND = Command('I', 0)
-COM_IDENTIFY_RECV = Command('I', 1)
+UBYTE = "B"
+SBYTE = "b"
+USHORT = "H"
+SSHORT = "h"
+FLOAT = "f"
+
+def format_length(fmt):
+    length = 0
+    for char in fmt:
+        if char in 'cbB?':
+            length += 1  # char, signed/unsigned char, bool
+        elif char in 'hH':
+            length += 2  # short, unsigned short
+        elif char in 'iI':
+            length += 4  # int, unsigned int
+        elif char in 'lL':
+            length += 4 if struct.calcsize('l') == 4 else 8  # long, unsigned long
+        elif char == 'f':
+            length += 4  # float
+        elif char == 'd':
+            length += 8  # double
+        else:
+            raise ValueError(f"Unsupported format character: {char}")
+    return length
+
+Command = namedtuple("Command", ("value", "length", "format"))
+
+def make_command(value, fmt=""):
+    return Command(value, format_length(fmt), fmt)
+
+COM_POKE_SEND = make_command('P')
+COM_IDENTIFY_SEND = make_command('I')
+COM_IDENTIFY_RECV = make_command('I', UBYTE)
 
 
 class SerialComms:
@@ -82,12 +111,12 @@ class SerialComms:
             checksum += buffer[i]
         return checksum % 0x100
 
-    def send(self, command: Command, fmt="", *data):
+    def send(self, command: Command, *data):
         # Create a buffer of the correct length
         buffer = bytearray(command.length + self.FRAME_BYTES)
 
         # Populate the buffer with the required header values and command data
-        struct.pack_into(">BB" + fmt + "B", buffer, 0,  # fmt, buffer, offset
+        struct.pack_into(">BB" + command.format + "B", buffer, 0,  # fmt, buffer, offset
                          self.START_BYTE,
                          ord(command.value),
                          *data,
@@ -102,7 +131,7 @@ class SerialComms:
         # Write out the buffer
         self.__serial.write(buffer)
 
-    def receive(self, command: Command, fmt="", timeout=DEFAULT_TIMEOUT):
+    def receive(self, command: Command, timeout=DEFAULT_TIMEOUT):
         # Calculate how long to wait for data
         ms = int(1000.0 * timeout + 0.5)
         end_ms = (monotonic_ns() // 1000000) + ms
@@ -126,12 +155,10 @@ class SerialComms:
             print("--------------------------------------------------")
             raise ValueError(f"Checksum mismatch! Expected {expected_checksum}, received {received_checksum}")
 
-        buffer = struct.unpack(">BB" + fmt + "B", received)
-        if len(fmt) > 0:
-            data = buffer[2:2 + command.length]
-            if len(fmt) == 1:
-                data = data[0]
-            return data
+        buffer = struct.unpack(">BB" + command.format + "B", received)
+        fmt_len = len(command.format)
+        if fmt_len > 0:
+            return buffer[2] if fmt_len == 1 else buffer[2:2 + fmt_len]
         else:
             return None
 
@@ -140,4 +167,4 @@ class SerialComms:
 
     def identify(self, timeout=DEFAULT_TIMEOUT):
         self.send(COM_IDENTIFY_SEND)
-        return self.receive(COM_IDENTIFY_RECV, "B", timeout)
+        return self.receive(COM_IDENTIFY_RECV, timeout)
