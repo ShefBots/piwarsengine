@@ -53,12 +53,21 @@ else:
     if IOController.EXPECTED_ID in instances.keys():
         io_controller = IOController(instances[IOController.EXPECTED_ID])
 
+if motor_driver is not None:
+    print("Motor Driver", end=" ")
+    print(f"ID is {hex(motor_driver.identify())}")
+
+if io_controller is not None:
+    print("IO Controller", end=" ")
+    print(f"ID is {hex(io_controller.identify())}")
+
 while True:
     if motor_driver is not None:
-        print("Motor Driver", end=" ")
-        motor_driver.identify()
+        print("Poking Motor Driver")
+        motor_driver.poke()
 
     if io_controller is not None:
-        print("IO Controller", end=" ")
-        io_controller.identify()
+        print("Poking IO Controller")
+        io_controller.poke()
+
     time.sleep(0.5)
