@@ -151,7 +151,15 @@ class SerialComms:
         received_checksum = received[-1]
         if received_checksum != expected_checksum:
             print("\n--------------------------------------------------")
-            print(received + self.__serial.read_all())
+            print("Recv Len:", end=" ")
+            print(receive_length)
+            print("Recv'd:", end=" ")
+            print(received)
+            print(received.hex())
+            print("In Buffer:", end=" ")
+            read_all = self.__serial.read_all()
+            print(read_all)
+            print(read_all.hex())
             print("--------------------------------------------------")
             raise ValueError(f"Checksum mismatch! Expected {expected_checksum}, received {received_checksum}")
 
