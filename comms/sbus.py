@@ -133,14 +133,14 @@ if __name__ == "__main__":
     uart = Serial(serial_port, baud_rate)
 
     controller = SBusReceiver(serial_port, 8, 0.1)
-    controller.assign_channel_decoder(0, analog_decoder)
-    controller.assign_channel_decoder(1, analog_decoder)
-    controller.assign_channel_decoder(2, analog_decoder)
-    controller.assign_channel_decoder(3, analog_decoder)
-    controller.assign_channel_decoder(4, binary_decoder)
-    controller.assign_channel_decoder(5, analog_biased_decoder)
-    controller.assign_channel_decoder(6, trinary_decoder)
-    controller.assign_channel_decoder(7, binary_decoder)
+    controller.assign_channel_decoder(0, analog_decoder)  # 1: Right Left/Right
+    controller.assign_channel_decoder(1, analog_decoder)  # 2: Right Up/Down
+    controller.assign_channel_decoder(2, analog_decoder)  # 3: Left Up/Down
+    controller.assign_channel_decoder(3, analog_decoder)  # 4: Left Left/Right
+    controller.assign_channel_decoder(4, binary_decoder)  # 5: SwA
+    controller.assign_channel_decoder(5, analog_biased_decoder)  #: 6 VrA
+    controller.assign_channel_decoder(6, analog_biased_decoder)  #: 7 VrB
+    controller.assign_channel_decoder(7, binary_decoder)  #: 8 SwD
 
     print("Establishing Connection")
 
