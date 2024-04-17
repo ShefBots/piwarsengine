@@ -16,9 +16,14 @@ COM_SET_GRIPPER_SEND = make_command('G', UBYTE)
 COM_READ_GRIPPER_SEND = make_command('g')
 COM_READ_GRIPPER_RECV = make_command('g', UBYTE)
 
+COM_READ_BARREL_SEND = make_command('B')
+COM_READ_BARREL_RECV = make_command('B', UBYTE)
+
 GRIPPER_CLOSED = 0
 GRIPPER_OPEN = 1
 GRIPPER_UNKNOWN = 2
+GRIPPER_CLOSING = 3
+GRIPPER_OPENING = 4
 
 class IOController:
     NAME = "IO Controller"
@@ -70,6 +75,16 @@ class IOController:
         except ValueError as e:
             print(e)
             return GRIPPER_UNKNOWN
+
+    def barrel_state(self):
+        self.__comms.send(COM_READ_BARREL_SEND)
+
+        # Catch an infrequent checksum error that occurs
+        try:
+            return self.__comms.receive(COM_READ_BARREL_RECV)
+        except ValueError as e:
+            print(e)
+            return 0
 
     def set_led(self, led, r, g, b):
         self.__comms.send(COM_SET_LED_SEND, led, r, g, b)
