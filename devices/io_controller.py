@@ -1,4 +1,4 @@
-from comms.serial import make_command, SerialComms, SSHORT, UBYTE
+from comms.serial import make_command, SerialComms, SSHORT, UBYTE, USHORT
 
 
 COM_READ_TOF_SEND = make_command('T', UBYTE)
@@ -12,6 +12,11 @@ COM_READ_GRIPPER_RECV = make_command('g', UBYTE)
 
 COM_READ_BARREL_SEND = make_command('B')
 COM_READ_BARREL_RECV = make_command('B', UBYTE)
+
+COM_POWER_TURRET_SEND = make_command('W', UBYTE)
+COM_SET_TURRET_TILT_SEND = make_command('E', USHORT)
+COM_SET_TURRET_SPEED_SEND = make_command('S', USHORT)
+COM_FIRE_TURRET_SEND = make_command('F')
 
 GRIPPER_CLOSED = 0
 GRIPPER_OPEN = 1
@@ -79,6 +84,19 @@ class IOController:
         except ValueError as e:
             print(e)
             return 0
+
+    def power_turret(self, state=0):
+        self.__comms.send(COM_POWER_TURRET_SEND, state)
+
+    def turret_tilt(self, angle=0):
+        self.__comms.send(COM_SET_TURRET_TILT_SEND, angle)
+
+    def turret_speed(self, speed=0):
+        self.__comms.send(COM_SET_TURRET_SPEED_SEND, speed)
+
+    def fire(self):
+        # could potentially add a timeout on calling this?
+        return self.__comms.send(COM_FIRE_TURRET_SEND)
 
     def set_led(self, led, r, g, b):
         self.__comms.send(COM_SET_LED_SEND, led, r, g, b)
