@@ -1,11 +1,5 @@
 from comms.serial import make_command, SerialComms, SSHORT, UBYTE
 
-COM_SET_SERVO_GRAB_ANGLE = make_command('G')
-COM_SET_SERVO_LAUNCH_ANGLE = make_command('L')
-COM_SET_LAUNCH_SPEED = make_command('S')
-COM_WS2812_COLOUR = make_command('C')
-COM_RC_RECEIVER = make_command('R')
-
 
 COM_READ_TOF_SEND = make_command('T', UBYTE)
 COM_READ_TOF_RECV = make_command('T', SSHORT)
