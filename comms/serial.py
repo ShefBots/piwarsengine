@@ -54,7 +54,8 @@ class SerialComms:
         self.state = self.WAITING
 
     def __del__(self):
-        self.__serial.close()
+        if self.__serial.isOpen():
+            self.__serial.close()
 
     """
     # This is no longer needed for our use-case as Pi will always initiate the communication
