@@ -99,4 +99,4 @@ class IOController:
         return self.__comms.send(COM_FIRE_TURRET_SEND)
 
     def set_led(self, led, r, g, b):
-        self.__comms.send(COM_SET_LED_SEND, led, r, g, b)
+        self.__comms.send(COM_SET_LED_SEND, led, int(r), int(g), int(b))
